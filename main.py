@@ -7,6 +7,9 @@ import plotly.graph_objects as go
 import plotly.express as px
 
 
+def get_markdown(filename) -> dcc.Markdown:
+    return dcc.Markdown(open(filename).read())
+
 df = pd.read_excel("Table Ciqual 2020_ENG_2020 07 07.xls",decimal=",",na_values=["-","traces"]).fillna(0)
 df = df.replace({'< ':'',",":'.'},regex=True)
 df = df.apply(pd.to_numeric,errors="ignore")
@@ -51,9 +54,8 @@ print(len(parents_0),len(parents_1),len(parents_2),len(parents_3))
 app = Dash(__name__)
 
 app.layout = html.Div([
-    dcc.Markdown('''
-    # Food composition table
-'''),
+    get_markdown('markdowns/headnotes.md'),
+    get_markdown('markdowns/table.md'),
     
     dash_table.DataTable(
         id="data_table",
@@ -61,27 +63,15 @@ app.layout = html.Div([
         columns=[
             {"name": i, "id": i} for i in df.columns],
         row_selectable='single'),
-        dcc.Markdown('''
-
-    # Calorie distribution pie chart
-'''), 
-    dcc.Graph(id="calorie_graph")
-    ,dcc.Markdown('''
-
-    # Nutrient composition expandable pie chart
-''')
-    ,
+    get_markdown('markdowns/calorie_chart.md'), 
+    dcc.Graph(id="calorie_graph"),
+    get_markdown('markdowns/nutrient_composition.md'),
     dcc.Graph(id="nutrient_composition_graph"),
-    dcc.Markdown('''
-
-    # Top foods by nutrient
-'''),dcc.Markdown('''
-
-    # Aggregated categories graph
-'''),dcc.Markdown('''
-
-    # Slider showing how well does X amount of food fill out the macro/micro nutrients
-'''),])
+    get_markdown('markdowns/top_nutrients.md'),
+    get_markdown('markdowns/nutrients_categories.md'),
+    get_markdown('markdowns/macros_filled.md'),
+    get_markdown('markdowns/footnotes.md')
+    ])
 
 @app.callback(
     Output("calorie_graph", "figure"),
@@ -116,7 +106,7 @@ def generate_nutrient_chart(selected_row_id):
     return fig
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server()
 
 
 

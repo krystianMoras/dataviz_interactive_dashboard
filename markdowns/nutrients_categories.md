@@ -1,0 +1,1 @@
+# Aggregated categories graph
