@@ -112,7 +112,8 @@ class NutrientInfoRepo():
         values = row[names].to_numpy().transpose().flatten()
         title = row['Name']
         return values,names,title
-
+    def get_title(self,selected_row):
+        return self._get_row(selected_row)['Name']
 
     def get_nutrient_composition(self,selected_row):
 

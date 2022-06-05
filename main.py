@@ -40,6 +40,7 @@ app.layout = html.Div(
     get_markdown('markdowns/headnotes.md'),
     get_markdown('markdowns/table.md'),
     
+    
     dash_table.DataTable(
         id="data_table",
         data=table,
@@ -52,19 +53,16 @@ app.layout = html.Div(
         'whiteSpace': 'normal',
         'height': 'auto',
     },),
-    html.Div(children=[
-    dcc.Graph(id="calorie_graph"),
-    html.Div(children=[
-        html.H1("Composition of food"),
-    dcc.Graph(id="nutrient_composition_graph"),
-    ])
+    html.H2(id="picked_food"),
+    dcc.Tabs(children=[
+        dcc.Tab(label='Calories', children=[
+            dcc.Graph(id="calorie_graph"),
     
-    ],style={'display': 'flex', 'flex-direction': 'row'}),
-
-
-    # tabs
-    dcc.Tabs( children=[
-        dcc.Tab(label='Dietary allowance', children=[
+    ]),
+     dcc.Tab(label='Nutrient composition', children=[
+         dcc.Graph(id="nutrient_composition_graph"),
+    ]),
+    dcc.Tab(label='Dietary allowance', children=[
             get_markdown('markdowns/macros_filled.md'),
             dcc.Input(
                 id="input_mass",
@@ -73,6 +71,12 @@ app.layout = html.Div(
             ),
             dcc.Graph(id="rda_bar_chart")
         ]),
+    ]),
+
+
+    # tabs
+    dcc.Tabs( children=[
+        
         dcc.Tab(label='Nutrients is individuals', children=[
             get_markdown('markdowns/correlations_nutrients.md'),
             html.Div(children=[
@@ -94,6 +98,13 @@ app.layout = html.Div(
     ])
 ])
     
+@app.callback(
+    Output("picked_food","children"),
+    Input("data_table","selected_rows")
+)
+def picked_food_title(selected_row_id):
+    
+    return repo.get_title(selected_row_id)
 
 @app.callback(
     Output("calorie_graph", "figure"),
@@ -101,7 +112,7 @@ app.layout = html.Div(
 def generate_calorie_chart(selected_row_id):
     
     values,names,title = repo.get_calorie_info(selected_row_id)
-    fig = px.pie(values=values, names=names, title=f"Calories source distribution of {title}", height=600,color=names,color_discrete_map={"Fat kcal":"red","Protein kcal":"green","Carbohydrate kcal":"orange","Alcohol kcal":"purple"})
+    fig = px.pie(values=values, names=names, height=600,color=names,color_discrete_map={"Fat kcal":"red","Protein kcal":"green","Carbohydrate kcal":"orange","Alcohol kcal":"purple"})
     return fig
 
 @app.callback(
@@ -112,7 +123,7 @@ def generate_nutrient_chart(selected_row_id):
     data_frame,path,values,title = repo.get_nutrient_composition(selected_row_id)
    # print(values)
     #title not visible :-(
-    fig = px.sunburst(data_frame, path=path, values=values,width=600,height=600,color='parents_0',color_discrete_map={"fats":"red","protein":"green","carbohydrates":"orange","alcohol":"cyan",'water':"blue"})
+    fig = px.sunburst(data_frame, path=path, values=values,width=800,height=800,color='parents_0',color_discrete_map={"fats":"red","protein":"green","carbohydrates":"orange","alcohol":"cyan",'water':"blue"})
     fig.update_layout(margin = dict(t=0, l=0, r=0, b=0))
 
     return fig
@@ -167,7 +178,7 @@ def generate_bar_chart(selected_row_id,value):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server()
 
 
 
