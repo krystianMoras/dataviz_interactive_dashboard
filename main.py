@@ -16,6 +16,7 @@ def get_markdown(filename) -> dcc.Markdown:
 
 
 app = Dash(__name__)
+server = app.server
 repo = data_util.NutrientInfoRepo()
 table, columns = repo.get_table()
 app.layout = html.Div(
