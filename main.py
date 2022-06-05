@@ -1,3 +1,4 @@
+from click import style
 from dash import dcc
 from dash import Dash, dcc, html, Input, Output
 from dash import html
@@ -6,6 +7,20 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 import data_util
+import dash_bootstrap_components as dbc
+
+# tabs_styles = {
+#     'height': '44px'
+# }
+# tab_style = {
+#     'fontWeight': 'bold',
+#     'fontSize' : '12'
+# }
+
+# tab_selected_style = {
+#     'fontWeight' :'bold'
+# }
+
 
 
 def get_markdown(filename) -> dcc.Markdown:
@@ -14,8 +29,9 @@ def get_markdown(filename) -> dcc.Markdown:
 
 # df.drop([])
 
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = Dash(__name__)
+app = Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 repo = data_util.NutrientInfoRepo()
 table, columns = repo.get_table()
@@ -44,33 +60,39 @@ app.layout = html.Div(
     ])
     
     ],style={'display': 'flex', 'flex-direction': 'row'}),
-    
-    get_markdown('markdowns/macros_filled.md'),
-    dcc.Input(
-            id="input_mass",
-            type="number",
-            placeholder="input type {}".format("number"),
-        ),
-    dcc.Graph(id="rda_bar_chart"),
-    
-    get_markdown('markdowns/correlations_nutrients.md'),
-    html.Div(children=[
-       dcc.Dropdown(options=repo.get_dropdown_options(), value=repo.get_dropdown_options()[0],placeholder="Select X axis", id='x-dropdown'),
-        dcc.Dropdown(options=repo.get_dropdown_options(), value=repo.get_dropdown_options()[0],placeholder="Select Y axis", id='y-dropdown'),
-        dcc.Dropdown(options=["None"] + repo.get_dropdown_options(),value= "None",placeholder="Select Z axis", id='z-dropdown'),
-    ]),
-    dcc.Graph(id="nutrient_corelation_scatter"),
-    get_markdown('markdowns/nutrients_categories.md'),
-    html.Div(children=[
-       dcc.Dropdown(options=repo.get_dropdown_options(), value=repo.get_dropdown_options()[0],placeholder="Select X axis", id='x-dropdown_2'),
-        dcc.Dropdown(options=repo.get_dropdown_options(), value=repo.get_dropdown_options()[0],placeholder="Select Y axis", id='y-dropdown_2'),
-        dcc.Dropdown(options=["None"] + repo.get_dropdown_options(),value= "None",placeholder="Select Z axis", id='z-dropdown_2'),
-    ]),
-    dcc.Graph(id="nutrient_corelation_grouped_scatter"),
-    
-    
-    get_markdown('markdowns/footnotes.md')
+
+
+    # tabs
+    dcc.Tabs( children=[
+        dcc.Tab(label='Dietary allowance', children=[
+            get_markdown('markdowns/macros_filled.md'),
+            dcc.Input(
+                id="input_mass",
+                type="number",
+                placeholder="input type {}".format("number"),
+            ),
+            dcc.Graph(id="rda_bar_chart")
+        ]),
+        dcc.Tab(label='Nutrients is individuals', children=[
+            get_markdown('markdowns/correlations_nutrients.md'),
+            html.Div(children=[
+                dcc.Dropdown(options=repo.get_dropdown_options(), value=repo.get_dropdown_options()[0],placeholder="Select X axis", id='x-dropdown', style={'width':'3'}),
+                dcc.Dropdown(options=repo.get_dropdown_options(), value=repo.get_dropdown_options()[0],placeholder="Select Y axis", id='y-dropdown'),
+                dcc.Dropdown(options=["None"] + repo.get_dropdown_options(),value= "None",placeholder="Select Z axis", id='z-dropdown'),
+            ]),
+            dcc.Graph(id="nutrient_corelation_scatter")
+        ]),
+        dcc.Tab(label='Nutrients in categories', children=[
+            get_markdown('markdowns/nutrients_categories.md'),
+            html.Div(children=[
+                dcc.Dropdown(options=repo.get_dropdown_options(), value=repo.get_dropdown_options()[0],placeholder="Select X axis", id='x-dropdown_2'),
+                dcc.Dropdown(options=repo.get_dropdown_options(), value=repo.get_dropdown_options()[0],placeholder="Select Y axis", id='y-dropdown_2'),
+                dcc.Dropdown(options=["None"] + repo.get_dropdown_options(),value= "None",placeholder="Select Z axis", id='z-dropdown_2'),
+            ]),
+            dcc.Graph(id="nutrient_corelation_grouped_scatter")
+        ])
     ])
+])
     
 
 @app.callback(
@@ -145,7 +167,7 @@ def generate_bar_chart(selected_row_id,value):
 
 
 if __name__ == '__main__':
-    app.run_server()
+    app.run_server(debug=True)
 
 
 
