@@ -28,6 +28,8 @@ class NutrientInfoRepo():
         df["Fat kcal"] = df['Fat (g/100g)'] * 9
         df["Alcohol kcal"] = df['Alcohol (g/100g)'] * 7
 
+        df['category'] = df['alim_grp_nom_eng'].replace({0: 'flours and doughs'})
+
         return df
 
     def _get_row(self,selected_row):
@@ -78,11 +80,11 @@ class NutrientInfoRepo():
         return cleaned_df.to_dict("records"), columns_to_pick
 
     def get_category_standardized_df(self):
-        return self.df.groupby('alim_grp_nom_eng').mean()
+        return self.df.groupby('category').mean()
     
-    def get_rda_chart(self,selected_row):
+    def get_rda_chart(self,selected_row,value):
         row = self._get_row(selected_row)
-        print(row.keys())
+        #print(row.keys())
         rda_values = {
             'Carbohydrate (g/100g)':130,'Fat (g/100g)':20+35/2,'Protein (g/100g)':56, 'Calcium (mg/100g)':1000,
        'Copper (mg/100g)':0.9, 'Iron (mg/100g)':8,'Magnesium (mg/100g)':400, 'Manganese (mg/100g)':2.3,
@@ -93,9 +95,9 @@ class NutrientInfoRepo():
         }
         rda_df = pd.DataFrame(columns=['value','nutrient'])
         for nutrient in rda_values:
-            print(row[nutrient])
-            print(rda_df.head())
-            row_d = {'nutrient':nutrient,'value':row[nutrient]*100 / rda_values[nutrient]}
+           # print(row[nutrient])
+            #print(rda_df.head())
+            row_d = {'nutrient':nutrient,'value':row[nutrient]*100*value / rda_values[nutrient]}
 
             rda_df = pd.concat([rda_df,pd.DataFrame(row_d,index=[0])])
         
@@ -131,4 +133,5 @@ class NutrientInfoRepo():
         nutrient_df = pd.DataFrame(
         dict(values=values, parents_3=parents_3, parents_2=parents_2, parents_1= parents_1,parents_0=parents_0))
         path = ['parents_0','parents_1', 'parents_2', 'parents_3']
-        return nutrient_df,path,values
+        title = row['Name']
+        return nutrient_df,path,values,title

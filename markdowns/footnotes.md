@@ -1,4 +1,4 @@
-# Bibliography
+## Bibliography
 
 [CIQUAL French food composition table](https://ciqual.anses.fr/)
 
